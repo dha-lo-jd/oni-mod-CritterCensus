@@ -20,6 +20,9 @@ public sealed class CensusScreen : KModalScreen
     private const float HeaderHeight = 24f;
     private const float BoxSize = 16f;
 
+    // The management menu buttons sit over the top of the right pane.
+    private const float TopReserved = 68f;
+
     private static readonly Color BoxColor = new Color(0.12f, 0.13f, 0.17f, 1f);
     private static readonly Color CheckColor = new Color(0.45f, 0.85f, 0.45f, 1f);
     private static readonly Color RowOn = new Color(0.33f, 0.36f, 0.46f, 1f);
@@ -30,11 +33,18 @@ public sealed class CensusScreen : KModalScreen
 
     private sealed class ToggleView
     {
+        public MultiToggle Vanilla;
         public Image Background;
         public GameObject Check;
 
         public void Set(bool on)
         {
+            if (Vanilla != null)
+            {
+                Vanilla.ChangeState(on ? 1 : 0);
+                return;
+            }
+
             Background.color = on ? RowOn : UiStyle.Button;
             Check.SetActive(on);
         }
@@ -204,7 +214,8 @@ public sealed class CensusScreen : KModalScreen
         borderImage.raycastTarget = false;
 
         UiFactory.CreateSpritePanel("Pane title", rect, "web_button", UiStyle.TitleBar, 0f, 0f, LeftWidth, TitleHeight);
-        UiFactory.CreateLabel(rect, Strings.Title, 8f, 6f, 200f, 24f, style: "style_titleTextLarge");
+        var title = UiFactory.CreateLabel(rect, Strings.Title, 8f, 8f, 190f, 20f, style: "style_titleTextLarge");
+        title.fontSize = 18f;
         countLabel = UiFactory.CreateLabel(rect, "", 200f, 8f, 80f, 20f, TMPro.TextAlignmentOptions.Right);
         var close = UiFactory.CreateButton(rect, "X", LeftWidth - 32f, 6f, 24f, 24f, Close);
         close.name = "Close";
@@ -272,7 +283,7 @@ public sealed class CensusScreen : KModalScreen
         }
     }
 
-    private static void ConfigureScroll(RectTransform viewport, RectTransform content)
+    private static ScrollRect ConfigureScroll(RectTransform viewport, RectTransform content)
     {
         var scroll = viewport.gameObject.AddComponent<ScrollRect>();
         scroll.viewport = viewport;
@@ -281,6 +292,7 @@ public sealed class CensusScreen : KModalScreen
         scroll.vertical = true;
         scroll.movementType = ScrollRect.MovementType.Clamped;
         scroll.scrollSensitivity = 30f;
+        return scroll;
     }
 
     private static void AddSection(RectTransform parent, string text)
@@ -293,6 +305,15 @@ public sealed class CensusScreen : KModalScreen
     // A button row with a checkbox in front of the label; the checkbox mirrors the toggle state.
     private static ToggleView AddToggle(RectTransform parent, string text, UnityEngine.Events.UnityAction onClick)
     {
+        var prefab = ToolMenu.Instance != null && ToolMenu.Instance.toolParameterMenu != null
+            ? ToolMenu.Instance.toolParameterMenu.widgetPrefab
+            : null;
+        var vanilla = prefab != null ? CreateVanillaToggle(prefab, parent, text, onClick) : null;
+        if (vanilla != null)
+        {
+            return vanilla;
+        }
+
         var button = UiFactory.CreateButton(parent, "", 0f, 0f, 0f, ToggleHeight, onClick);
         button.gameObject.AddComponent<LayoutElement>().minHeight = ToggleHeight;
         var holder = button.GetComponent<RectTransform>();
@@ -305,18 +326,40 @@ public sealed class CensusScreen : KModalScreen
         return new ToggleView { Background = button.GetComponent<Image>(), Check = check.gameObject };
     }
 
+    // The game's own filter row (checkbox + label), as used by the tool filter menu.
+    private static ToggleView CreateVanillaToggle(GameObject prefab, RectTransform parent, string text, UnityEngine.Events.UnityAction onClick)
+    {
+        var go = Util.KInstantiateUI(prefab, parent.gameObject, force_active: true);
+        var toggle = go.GetComponentInChildren<MultiToggle>();
+        var label = go.GetComponentInChildren<LocText>();
+        if (toggle == null || label == null)
+        {
+            Destroy(go);
+            return null;
+        }
+
+        label.text = text;
+        toggle.onClick = () => onClick();
+        if (go.GetComponent<LayoutElement>() == null)
+        {
+            go.AddComponent<LayoutElement>().minHeight = ToggleHeight;
+        }
+
+        return new ToggleView { Vanilla = toggle };
+    }
+
     private void BuildHeader(RectTransform right, float width)
     {
-        UiFactory.CreateSpritePanel("Header", right, "web_box", UiStyle.SortHeader, Margin, Margin, width - Margin * 2f, HeaderHeight);
+        UiFactory.CreateSpritePanel("Header", right, "web_box", UiStyle.SortHeader, Margin, TopReserved, width - Margin * 2f, HeaderHeight);
         for (var i = 0; i < ColumnNames.Length; i++)
         {
-            UiFactory.CreateLabel(right, ColumnNames[i], Margin + ColumnX[i], Margin + 2f, 240f, 20f);
+            UiFactory.CreateLabel(right, ColumnNames[i], Margin + ColumnX[i], TopReserved + 2f, 240f, 20f);
         }
     }
 
     private void BuildList(RectTransform right)
     {
-        var top = Margin + HeaderHeight + 2f;
+        var top = TopReserved + HeaderHeight + 2f;
         var viewport = UiFactory.CreateRect("Viewport", right, Margin, top, 0f, 0f);
         viewport.anchorMin = Vector2.zero;
         viewport.anchorMax = Vector2.one;
@@ -339,7 +382,13 @@ public sealed class CensusScreen : KModalScreen
         layout.childForceExpandHeight = false;
         layout.spacing = 2f;
         content.gameObject.AddComponent<ContentSizeFitter>().verticalFit = ContentSizeFitter.FitMode.PreferredSize;
-        ConfigureScroll(viewport, content);
+        var scroll = ConfigureScroll(viewport, content);
+
+        // Rubber band like the skills and research screens: overscroll springs back, flicks coast.
+        scroll.movementType = ScrollRect.MovementType.Elastic;
+        scroll.elasticity = 0.1f;
+        scroll.inertia = true;
+        scroll.decelerationRate = 0.135f;
     }
 
     // Rebuilds the visible rows from the filters (genus selection is OR within itself, AND with the stage toggles).
