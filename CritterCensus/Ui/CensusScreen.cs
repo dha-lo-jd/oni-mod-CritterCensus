@@ -59,6 +59,11 @@ public sealed class CensusScreen : KModalScreen
     private RectTransform content;
     private LocText countLabel;
     private RectTransform header;
+    private readonly List<LocText> headerLabels = new List<LocText>();
+
+    // Column being sorted (-1: snapshot order) and its direction; unknown values always sort last.
+    private int sortColumn = -1;
+    private bool sortDescending;
     private List<CritterRow> rows;
     private readonly HashSet<CritterStage> stages = new HashSet<CritterStage> { CritterStage.Adult, CritterStage.Baby, CritterStage.Egg };
     private readonly HashSet<string> genera = new HashSet<string>();
@@ -155,6 +160,20 @@ public sealed class CensusScreen : KModalScreen
         {
             PauseScreen.Instance.Show(false);
         }
+
+        ModalScreens.CloseOthers(null);
+    }
+
+    // Hiding this window (e.g. another mod's window opening) closes it for good.
+    public override void Show(bool show = true)
+    {
+        if (!show)
+        {
+            Close();
+            return;
+        }
+
+        base.Show(show);
     }
 
     // Another management screen (skills, research, ...) or the pause menu took over: close this window.
@@ -375,8 +394,94 @@ public sealed class CensusScreen : KModalScreen
         UiFactory.CreateSpritePanel("Header background", header, "web_box", UiStyle.SortHeader, 0f, 0f, width - Margin * 2f, HeaderHeight);
         for (var i = 0; i < ColumnNames.Length; i++)
         {
-            UiFactory.CreateLabel(header, ColumnNames[i], ColumnX[i], 2f, 240f, 20f);
+            headerLabels.Add(UiFactory.CreateLabel(header, ColumnNames[i], ColumnX[i], 2f, 240f, 20f));
+
+            // Transparent click area over the header cell: ascending, descending, then unsorted.
+            var column = i;
+            var areaWidth = column + 1 < ColumnX.Length ? ColumnX[column + 1] - ColumnX[column] - 4f : 200f;
+            var area = UiFactory.CreatePanel("Sort " + column, header, new Color(0f, 0f, 0f, 0f), ColumnX[column] - 4f, 0f, areaWidth, HeaderHeight);
+            var button = area.gameObject.AddComponent<Button>();
+            button.targetGraphic = area;
+            var colors = button.colors;
+            colors.highlightedColor = new Color(1f, 1f, 1f, 0.15f);
+            colors.pressedColor = new Color(1f, 1f, 1f, 0.3f);
+            button.colors = colors;
+            button.onClick.AddListener(() => CycleSort(column));
         }
+    }
+
+    private void CycleSort(int column)
+    {
+        if (sortColumn != column)
+        {
+            sortColumn = column;
+            sortDescending = false;
+        }
+        else if (!sortDescending)
+        {
+            sortDescending = true;
+        }
+        else
+        {
+            sortColumn = -1;
+            sortDescending = false;
+        }
+
+        for (var i = 0; i < headerLabels.Count; i++)
+        {
+            headerLabels[i].text = ColumnNames[i] + (i == sortColumn ? (sortDescending ? " ▼" : " ▲") : "");
+        }
+
+        Refresh();
+    }
+
+    // Numeric sort key of a column; null when the value is unknown (those rows always go last).
+    private static double? SortKey(CritterRow row, int column)
+    {
+        switch (column)
+        {
+            case 0: return (int)row.Stage;
+            case 2: return row.IsWild ? 1 : 0;
+            case 3: return row.Stage == CritterStage.Egg
+                ? (row.Hatch < 0f ? null : row.Hatch)
+                : (row.Age < 0f ? null : row.Age);
+            case 4: return float.IsNaN(row.Happiness) ? null : row.Happiness;
+            case 5: return row.Fertility < 0f ? null : row.Fertility;
+            case 6: return row.Fullness < 0f ? null : row.Fullness;
+            case 7: return string.IsNullOrEmpty(row.Ailments) ? 0 : row.Ailments.Split(new[] { ", " }, System.StringSplitOptions.None).Length;
+            default: return null;
+        }
+    }
+
+    private List<CritterRow> Sorted(List<CritterRow> list)
+    {
+        if (sortColumn < 0)
+        {
+            return list;
+        }
+
+        if (sortColumn == 1)
+        {
+            var byName = list.OrderBy(r => r.GenusName, System.StringComparer.CurrentCulture).ThenBy(r => r.MorphName, System.StringComparer.CurrentCulture);
+            return (sortDescending ? byName.Reverse() : byName).ToList();
+        }
+
+        var known = list.Where(r => SortKey(r, sortColumn) != null);
+
+        // Age column: eggs (ordered by hatch progress) stay above the creatures when ascending, below when descending.
+        var eggsFirst = sortColumn == 3 && !sortDescending;
+        var eggsLast = sortColumn == 3 && sortDescending;
+        var ordered = (sortDescending
+            ? known.OrderByDescending(r => SortKey(r, sortColumn).Value)
+            : known.OrderBy(r => SortKey(r, sortColumn).Value)).ToList();
+        if (eggsFirst || eggsLast)
+        {
+            var eggs = ordered.Where(r => r.Stage == CritterStage.Egg);
+            var creatures = ordered.Where(r => r.Stage != CritterStage.Egg);
+            ordered = (eggsFirst ? eggs.Concat(creatures) : creatures.Concat(eggs)).ToList();
+        }
+
+        return ordered.Concat(list.Where(r => SortKey(r, sortColumn) == null)).ToList();
     }
 
     private void BuildList(RectTransform right)
@@ -439,7 +544,7 @@ public sealed class CensusScreen : KModalScreen
             Destroy(content.GetChild(i).gameObject);
         }
 
-        var shown = rows.Where(r => stages.Contains(r.Stage) && (genera.Count == 0 || genera.Contains(r.GenusKey))).ToList();
+        var shown = Sorted(rows.Where(r => stages.Contains(r.Stage) && (genera.Count == 0 || genera.Contains(r.GenusKey))).ToList());
         countLabel.text = shown.Count + " / " + rows.Count;
         if (rows.Count == 0)
         {
