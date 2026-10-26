@@ -48,6 +48,9 @@ public sealed class CritterRow
     public Sprite Icon;
     public Color IconColor = Color.white;
 
+    // The creature or egg itself, for live tooltip data.
+    public GameObject Source;
+
     // What a click selects, and where the camera goes.
     public KSelectable Target;
     public Vector3 Position;

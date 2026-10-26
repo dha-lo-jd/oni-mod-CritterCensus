@@ -66,6 +66,7 @@ public static class CritterCollector
             GenusName = brain.species.ProperName(),
             MorphName = MorphName(baby != null ? baby.adultPrefab : prefabId.PrefabTag),
             IsWild = prefabId.HasTag(GameTags.Creatures.Wild),
+            Source = go,
             Target = go.GetComponent<KSelectable>(),
             Position = go.transform.GetPosition(),
         };
@@ -126,6 +127,7 @@ public static class CritterCollector
             HatchMorphName = MorphName(adultTag),
             IsWild = go.HasTag(GameTags.Creatures.Wild),
             // An egg inside an incubator is picked through the incubator.
+            Source = go,
             Target = holder.GetComponent<KSelectable>(),
             Position = holder.transform.GetPosition(),
         };

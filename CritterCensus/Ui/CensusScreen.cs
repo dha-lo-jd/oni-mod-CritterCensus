@@ -470,19 +470,27 @@ public sealed class CensusScreen : KModalScreen
 
         Cell(holder, 0, StageName(row.Stage));
         Cell(holder, 1, row.Stage == CritterStage.Egg ? row.MorphName + " -> " + row.HatchMorphName : row.MorphName);
-        Cell(holder, 2, row.IsWild ? Strings.Wild : Strings.Tame);
+        Cell(holder, 2, row.IsWild ? Strings.Wild : Strings.Tame, CritterTooltips.Wildness(row));
         Cell(holder, 3, AgeText(row));
-        Cell(holder, 4, float.IsNaN(row.Happiness) ? "-" : row.Happiness.ToString("0.0"));
-        Cell(holder, 5, ProgressText(row.Fertility, row.FertilityTotalCycles, row.FertilityRemainingCycles));
-        Cell(holder, 6, Percent(row.Fullness));
+        Cell(holder, 4, float.IsNaN(row.Happiness) ? "-" : row.Happiness.ToString("0.0"), CritterTooltips.Happiness(row));
+        Cell(holder, 5, ProgressText(row.Fertility, row.FertilityTotalCycles, row.FertilityRemainingCycles), CritterTooltips.Breeding(row));
+        Cell(holder, 6, Percent(row.Fullness), CritterTooltips.Fullness(row));
         Cell(holder, 7, row.Ailments);
     }
 
-    private static void Cell(RectTransform holder, int column, string text)
+    private static void Cell(RectTransform holder, int column, string text, string tooltip = null)
     {
         var width = column == 7 ? 700f : column == 1 ? 250f - IconSize - 4f : column == 3 || column == 5 ? 250f : 80f;
         var x = column == 1 ? ColumnX[1] + IconSize + 4f : ColumnX[column];
         UiFactory.CreateLabel(holder, text, x, (RowHeight - 20f) / 2f, width, 20f);
+
+        if (!string.IsNullOrEmpty(tooltip))
+        {
+            // Invisible hover area over the cell; clicks fall through to the row button behind it.
+            var hoverWidth = column + 1 < ColumnX.Length ? ColumnX[column + 1] - ColumnX[column] - 4f : width;
+            var hover = UiFactory.CreatePanel("Hover", holder, new Color(0f, 0f, 0f, 0f), ColumnX[column], 0f, hoverWidth, RowHeight);
+            hover.gameObject.AddComponent<ToolTip>().SetSimpleTooltip(tooltip);
+        }
     }
 
     private static string StageName(CritterStage stage)
@@ -507,12 +515,12 @@ public sealed class CensusScreen : KModalScreen
             return ProgressText(row.Hatch, row.HatchTotalCycles, row.HatchRemainingCycles);
         }
 
-        return row.Age < 0f ? "-" : Cycles(row.Age) + "/" + Cycles(row.Lifespan) + "(" + Cycles(row.CyclesUntilDeath) + ")";
+        return row.Age < 0f ? "-" : Cycles(row.Age) + "/" + Cycles(row.Lifespan) + "(" + Cycles(row.CyclesUntilDeath) + " left)";
     }
 
     private static string Cycles(float value) => value.ToString("0.0") + "cyc";
 
-    // "[percent]%/[total]cyc([remaining]cyc)"; the cycle figures are "-" while the amount isn't progressing.
+    // "[percent]%/[total]cyc([remaining]cyc left)"; the cycle figures are "-" while the amount isn't progressing.
     private static string ProgressText(float ratio, float total, float remaining)
     {
         if (ratio < 0f)
@@ -521,7 +529,7 @@ public sealed class CensusScreen : KModalScreen
         }
 
         var percent = Mathf.RoundToInt(ratio * 100f) + "%";
-        return total < 0f ? percent + "/-(-)" : percent + "/" + Cycles(total) + "(" + Cycles(remaining) + ")";
+        return total < 0f ? percent + "/-(-)" : percent + "/" + Cycles(total) + "(" + Cycles(remaining) + " left)";
     }
 
     // Closes the modal and shows the clicked critter (or the incubator holding the clicked egg).
