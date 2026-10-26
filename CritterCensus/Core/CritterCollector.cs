@@ -77,6 +77,7 @@ public static class CritterCollector
             row.CyclesUntilDeath = age.CyclesUntilDeath;
         }
 
+        SetIcon(row, go);
         row.Fertility = Ratio(Db.Get().Amounts.Fertility.Lookup(go));
         row.Fullness = Ratio(Db.Get().Amounts.Calories.Lookup(go));
         row.Ailments = Ailments(row.Target);
@@ -130,8 +131,19 @@ public static class CritterCollector
             }
         }
 
+        SetIcon(row, go);
         row.Ailments = Ailments(go.GetComponent<KSelectable>());
         return row;
+    }
+
+    private static void SetIcon(CritterRow row, GameObject go)
+    {
+        var icon = Def.GetUISprite(go);
+        if (icon != null)
+        {
+            row.Icon = icon.first;
+            row.IconColor = icon.second;
+        }
     }
 
     private static string MorphName(Tag prefab)

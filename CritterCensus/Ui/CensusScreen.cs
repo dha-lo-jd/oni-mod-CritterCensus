@@ -16,7 +16,8 @@ public sealed class CensusScreen : KModalScreen
     private const float TitleHeight = 36f;
     private const float ToggleHeight = 28f;
     private const float SectionHeight = 22f;
-    private const float RowHeight = 24f;
+    private const float RowHeight = 44f;
+    private const float IconSize = 36f;
     private const float HeaderHeight = 24f;
     private const float BoxSize = 16f;
 
@@ -26,7 +27,7 @@ public sealed class CensusScreen : KModalScreen
     private static readonly Color BoxColor = new Color(0.12f, 0.13f, 0.17f, 1f);
     private static readonly Color CheckColor = new Color(0.45f, 0.85f, 0.45f, 1f);
     private static readonly Color RowOn = new Color(0.33f, 0.36f, 0.46f, 1f);
-    private static readonly float[] ColumnX = { 8f, 80f, 330f, 410f, 590f, 690f, 790f };
+    private static readonly float[] ColumnX = { 8f, 80f, 370f, 450f, 630f, 730f, 830f };
     private static readonly string[] ColumnNames = { "Stage", "Critter", "Origin", "Age / lifespan", "Fertility", "Fullness", "Ailments" };
 
     private static CensusScreen current;
@@ -459,6 +460,14 @@ public sealed class CensusScreen : KModalScreen
         var button = UiFactory.CreateButton(content, "", 0f, 0f, 0f, RowHeight, () => Pick(row));
         button.gameObject.AddComponent<LayoutElement>().minHeight = RowHeight;
         var holder = button.GetComponent<RectTransform>();
+        if (row.Icon != null)
+        {
+            var icon = UiFactory.CreatePanel("Icon", holder, row.IconColor, ColumnX[1], (RowHeight - IconSize) / 2f, IconSize, IconSize);
+            icon.sprite = row.Icon;
+            icon.preserveAspect = true;
+            icon.raycastTarget = false;
+        }
+
         Cell(holder, 0, StageName(row.Stage));
         Cell(holder, 1, row.Stage == CritterStage.Egg ? row.MorphName + " -> " + row.HatchMorphName : row.MorphName);
         Cell(holder, 2, row.IsWild ? Strings.Wild : Strings.Tame);
@@ -470,8 +479,9 @@ public sealed class CensusScreen : KModalScreen
 
     private static void Cell(RectTransform holder, int column, string text)
     {
-        var width = column == 6 ? 700f : column == 1 ? 250f : 170f;
-        UiFactory.CreateLabel(holder, text, ColumnX[column], 2f, width, 20f);
+        var width = column == 6 ? 700f : column == 1 ? 250f - IconSize - 4f : 170f;
+        var x = column == 1 ? ColumnX[1] + IconSize + 4f : ColumnX[column];
+        UiFactory.CreateLabel(holder, text, x, (RowHeight - 20f) / 2f, width, 20f);
     }
 
     private static string StageName(CritterStage stage)

@@ -33,6 +33,10 @@ public sealed class CritterRow
 
     public string Ailments;
 
+    // Default "ui" pose of this critter's prefab, as the game shows it in its own lists.
+    public Sprite Icon;
+    public Color IconColor = Color.white;
+
     // What a click selects, and where the camera goes.
     public KSelectable Target;
     public Vector3 Position;
