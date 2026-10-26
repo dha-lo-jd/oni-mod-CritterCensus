@@ -1,0 +1,6 @@
+title: "Critter Census"
+description: "Critter population overview."
+requiredDlcIds: []
+forbiddenDlcIds: []
+minimumSupportedBuild: 744825
+version: "1.0.0"
