@@ -53,6 +53,7 @@ public sealed class CensusScreen : KModalScreen
     private RectTransform rect;
     private RectTransform content;
     private LocText countLabel;
+    private RectTransform header;
     private List<CritterRow> rows;
     private readonly HashSet<CritterStage> stages = new HashSet<CritterStage> { CritterStage.Adult, CritterStage.Baby, CritterStage.Egg };
     private readonly HashSet<string> genera = new HashSet<string>();
@@ -302,58 +303,74 @@ public sealed class CensusScreen : KModalScreen
         UiFactory.CreateLabel(holder, text, 4f, 2f, 240f, 20f);
     }
 
-    // A button row with a checkbox in front of the label; the checkbox mirrors the toggle state.
+    // A button row with a checkbox in front of the label. Clicking anywhere on the row toggles; the checkbox mirrors
+    // the toggle state. The checkbox is the game's own filter checkbox when available, else a drawn box.
     private static ToggleView AddToggle(RectTransform parent, string text, UnityEngine.Events.UnityAction onClick)
     {
-        var prefab = ToolMenu.Instance != null && ToolMenu.Instance.toolParameterMenu != null
-            ? ToolMenu.Instance.toolParameterMenu.widgetPrefab
-            : null;
-        var vanilla = prefab != null ? CreateVanillaToggle(prefab, parent, text, onClick) : null;
-        if (vanilla != null)
-        {
-            return vanilla;
-        }
-
         var button = UiFactory.CreateButton(parent, "", 0f, 0f, 0f, ToggleHeight, onClick);
         button.gameObject.AddComponent<LayoutElement>().minHeight = ToggleHeight;
         var holder = button.GetComponent<RectTransform>();
+        UiFactory.CreateLabel(holder, text, 8f + BoxSize + 8f, (ToggleHeight - 20f) / 2f, 260f, 20f);
+
+        var vanilla = GraftVanillaCheckbox(holder);
+        if (vanilla != null)
+        {
+            return new ToggleView { Vanilla = vanilla };
+        }
 
         var box = UiFactory.CreatePanel("Checkbox", holder, BoxColor, 8f, (ToggleHeight - BoxSize) / 2f, BoxSize, BoxSize);
         box.raycastTarget = false;
         var check = UiFactory.CreatePanel("Check", box.transform, CheckColor, 3f, 3f, BoxSize - 6f, BoxSize - 6f);
         check.raycastTarget = false;
-        UiFactory.CreateLabel(holder, text, 8f + BoxSize + 8f, (ToggleHeight - 20f) / 2f, 260f, 20f);
         return new ToggleView { Background = button.GetComponent<Image>(), Check = check.gameObject };
     }
 
-    // The game's own filter row (checkbox + label), as used by the tool filter menu.
-    private static ToggleView CreateVanillaToggle(GameObject prefab, RectTransform parent, string text, UnityEngine.Events.UnityAction onClick)
+    // Takes the checkbox out of the game's filter row and puts it at the left of our own row. Clicks on the checkbox
+    // itself are consumed by it, so only row clicks reach the row button (no double toggle).
+    private static MultiToggle GraftVanillaCheckbox(RectTransform row)
     {
-        var go = Util.KInstantiateUI(prefab, parent.gameObject, force_active: true);
-        var toggle = go.GetComponentInChildren<MultiToggle>();
-        var label = go.GetComponentInChildren<LocText>();
-        if (toggle == null || label == null)
+        var prefab = ToolMenu.Instance != null && ToolMenu.Instance.toolParameterMenu != null
+            ? ToolMenu.Instance.toolParameterMenu.widgetPrefab
+            : null;
+        if (prefab == null)
         {
-            Destroy(go);
             return null;
         }
 
-        label.text = text;
-        toggle.onClick = () => onClick();
-        if (go.GetComponent<LayoutElement>() == null)
+        var source = Util.KInstantiateUI(prefab, row.gameObject, force_active: true);
+        var toggle = source.GetComponentInChildren<MultiToggle>();
+        if (toggle == null)
         {
-            go.AddComponent<LayoutElement>().minHeight = ToggleHeight;
+            Destroy(source);
+            return null;
         }
 
-        return new ToggleView { Vanilla = toggle };
+        var rect = toggle.GetComponent<RectTransform>();
+        var size = rect.rect.size;
+        rect.SetParent(row, false);
+        Destroy(source);
+        var layoutElement = toggle.GetComponent<LayoutElement>();
+        if (layoutElement != null)
+        {
+            Destroy(layoutElement);
+        }
+
+        rect.anchorMin = new Vector2(0f, 0.5f);
+        rect.anchorMax = new Vector2(0f, 0.5f);
+        rect.pivot = new Vector2(0f, 0.5f);
+        rect.sizeDelta = size.x > 4f && size.y > 4f ? size : new Vector2(BoxSize, BoxSize);
+        rect.anchoredPosition = new Vector2(8f, 0f);
+        return toggle;
     }
 
+    // The header is one container so it can follow the list when it is pulled down past its top.
     private void BuildHeader(RectTransform right, float width)
     {
-        UiFactory.CreateSpritePanel("Header", right, "web_box", UiStyle.SortHeader, Margin, TopReserved, width - Margin * 2f, HeaderHeight);
+        header = UiFactory.CreateRect("Header", right, Margin, TopReserved, width - Margin * 2f, HeaderHeight);
+        UiFactory.CreateSpritePanel("Header background", header, "web_box", UiStyle.SortHeader, 0f, 0f, width - Margin * 2f, HeaderHeight);
         for (var i = 0; i < ColumnNames.Length; i++)
         {
-            UiFactory.CreateLabel(right, ColumnNames[i], Margin + ColumnX[i], TopReserved + 2f, 240f, 20f);
+            UiFactory.CreateLabel(header, ColumnNames[i], ColumnX[i], 2f, 240f, 20f);
         }
     }
 
@@ -389,6 +406,13 @@ public sealed class CensusScreen : KModalScreen
         scroll.elasticity = 0.1f;
         scroll.inertia = true;
         scroll.decelerationRate = 0.135f;
+
+        // Pulling down past the top drags the header along; scrolling up leaves it fixed above the list.
+        scroll.onValueChanged.AddListener(_ =>
+        {
+            var overscroll = Mathf.Min(0f, content.anchoredPosition.y);
+            UiFactory.Place(header, Margin, TopReserved - overscroll, header.sizeDelta.x, HeaderHeight);
+        });
     }
 
     // Rebuilds the visible rows from the filters (genus selection is OR within itself, AND with the stage toggles).
