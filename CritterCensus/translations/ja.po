@@ -1,0 +1,121 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: PO Editor\n"
+"Application: Oxygen Not IncludedPOT Version: 2.0\n"
+"Language: ja_JP\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Report-Msgid-Bugs-To: \n"
+"PO-Revision-Date: \n"
+"Last-Translator: \n"
+"Language-Team: \n"
+
+msgctxt "CritterCensus.STRINGS.UI.TOOL_NAME"
+msgid "Critter Census"
+msgstr "生き物センサス"
+
+msgctxt "CritterCensus.STRINGS.UI.TOOL_TOOLTIP"
+msgid "Drag to list the critters and eggs in an area"
+msgstr "ドラッグした範囲内の生き物と卵を一覧表示します"
+
+msgctxt "CritterCensus.STRINGS.UI.TITLE"
+msgid "Critter Census"
+msgstr "生き物センサス"
+
+msgctxt "CritterCensus.STRINGS.UI.EMPTY"
+msgid "No critters or eggs in the selected area."
+msgstr "選択範囲内に生き物も卵もいません。"
+
+msgctxt "CritterCensus.STRINGS.UI.FILTERS.STAGE"
+msgid "Stage"
+msgstr "成長段階"
+
+msgctxt "CritterCensus.STRINGS.UI.FILTERS.GENUS"
+msgid "Genus"
+msgstr "属"
+
+msgctxt "CritterCensus.STRINGS.UI.FILTERS.ALL"
+msgid "All"
+msgstr "すべて"
+
+msgctxt "CritterCensus.STRINGS.UI.STAGES.ADULT"
+msgid "Adult"
+msgstr "成体"
+
+msgctxt "CritterCensus.STRINGS.UI.STAGES.BABY"
+msgid "Baby"
+msgstr "幼体"
+
+msgctxt "CritterCensus.STRINGS.UI.STAGES.EGG"
+msgid "Egg"
+msgstr "卵"
+
+msgctxt "CritterCensus.STRINGS.UI.ORIGINS.WILD"
+msgid "Wild"
+msgstr "野生"
+
+msgctxt "CritterCensus.STRINGS.UI.ORIGINS.TAME"
+msgid "Tame"
+msgstr "家畜"
+
+msgctxt "CritterCensus.STRINGS.UI.COLUMNS.STAGE"
+msgid "Stage"
+msgstr "段階"
+
+msgctxt "CritterCensus.STRINGS.UI.COLUMNS.CRITTER"
+msgid "Critter"
+msgstr "生き物"
+
+msgctxt "CritterCensus.STRINGS.UI.COLUMNS.ORIGIN"
+msgid "Origin"
+msgstr "野生/家畜"
+
+msgctxt "CritterCensus.STRINGS.UI.COLUMNS.AGE"
+msgid "Age / lifespan"
+msgstr "年齢 / 寿命"
+
+msgctxt "CritterCensus.STRINGS.UI.COLUMNS.HAPPINESS"
+msgid "Happiness"
+msgstr "幸福度"
+
+msgctxt "CritterCensus.STRINGS.UI.COLUMNS.FERTILITY"
+msgid "Fertility"
+msgstr "繁殖率"
+
+msgctxt "CritterCensus.STRINGS.UI.COLUMNS.FULLNESS"
+msgid "Fullness"
+msgstr "満腹度"
+
+msgctxt "CritterCensus.STRINGS.UI.COLUMNS.AILMENTS"
+msgid "Ailments"
+msgstr "状態異常"
+
+msgctxt "CritterCensus.STRINGS.UI.FORMATS.CYCLES"
+msgid "{0}cyc"
+msgstr "{0}サイクル"
+
+msgctxt "CritterCensus.STRINGS.UI.FORMATS.LEFT"
+msgid "({0} left)"
+msgstr "(残り{0})"
+
+msgctxt "CritterCensus.STRINGS.UI.TOOLTIPS.EGG_CHANCES"
+msgid "Egg chances"
+msgstr "産卵確率"
+
+msgctxt "CritterCensus.STRINGS.UI.TOOLTIPS.HAPPINESS"
+msgid "Happiness: {0}"
+msgstr "幸福度: {0}"
+
+msgctxt "CritterCensus.STRINGS.UI.TOOLTIPS.CALORIES"
+msgid "Calories: {0} / {1}"
+msgstr "カロリー: {0} / {1}"
+
+msgctxt "CritterCensus.STRINGS.UI.TOOLTIPS.WILDNESS"
+msgid "Wildness: {0} / {1} ({2}%)"
+msgstr "野生度: {0} / {1} ({2}%)"
+
+msgctxt "CritterCensus.STRINGS.UI.TOOLTIPS.WILDNESS_CHANGE"
+msgid "Change: {0} per cycle"
+msgstr "変化: 1サイクルあたり{0}"

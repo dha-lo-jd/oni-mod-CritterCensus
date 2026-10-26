@@ -25,7 +25,7 @@ public static class CritterTooltips
             return null;
         }
 
-        var text = new StringBuilder("Egg chances");
+        var text = new StringBuilder(STRINGS.UI.TOOLTIPS.EGG_CHANCES);
         foreach (var chance in fertility.breedingChances.OrderByDescending(c => c.weight))
         {
             var prefab = Assets.GetPrefab(chance.egg);
@@ -46,7 +46,7 @@ public static class CritterTooltips
         }
 
         var attribute = monitor.happiness;
-        var text = new StringBuilder("Happiness: " + attribute.GetTotalValue().ToString("0.0"));
+        var text = new StringBuilder(string.Format(STRINGS.UI.TOOLTIPS.HAPPINESS, attribute.GetTotalValue().ToString("0.0")));
         AppendModifiers(text, attribute, 1f);
         return text.ToString();
     }
@@ -59,7 +59,7 @@ public static class CritterTooltips
             return null;
         }
 
-        return "Calories: " + GameUtil.GetFormattedCalories(calories.value) + " / " + GameUtil.GetFormattedCalories(calories.GetMax());
+        return string.Format(STRINGS.UI.TOOLTIPS.CALORIES, GameUtil.GetFormattedCalories(calories.value), GameUtil.GetFormattedCalories(calories.GetMax()));
     }
 
     // Wildness level, its change per cycle and the modifiers behind that change. Only for wild critters.
@@ -72,9 +72,9 @@ public static class CritterTooltips
         }
 
         var max = wildness.GetMax();
-        var text = new StringBuilder("Wildness: " + wildness.value.ToString("0.0") + " / " + max.ToString("0.#")
-            + " (" + Mathf.RoundToInt(max > 0f ? wildness.value / max * 100f : 0f) + "%)");
-        text.Append("\nChange: ").Append((wildness.GetDelta() * SecondsPerCycle).ToString("+0.##;-0.##;0")).Append(" per cycle");
+        var percent = Mathf.RoundToInt(max > 0f ? wildness.value / max * 100f : 0f);
+        var text = new StringBuilder(string.Format(STRINGS.UI.TOOLTIPS.WILDNESS, wildness.value.ToString("0.0"), max.ToString("0.#"), percent));
+        text.Append('\n').Append(string.Format(STRINGS.UI.TOOLTIPS.WILDNESS_CHANGE, (wildness.GetDelta() * SecondsPerCycle).ToString("+0.##;-0.##;0")));
         AppendModifiers(text, wildness.deltaAttribute, SecondsPerCycle);
         return text.ToString();
     }

@@ -74,6 +74,11 @@
         <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(ModInstallPath)" />
         <Copy SourceFiles="$(TargetDir)$(TargetName).pdb" DestinationFolder="$(ModInstallPath)" Condition="Exists('$(TargetDir)$(TargetName).pdb')" />
         <Copy SourceFiles="$(ProjectDir)mod_info.yaml" DestinationFolder="$(ModInstallPath)" Condition="Exists('$(ProjectDir)mod_info.yaml')" />
+        <ItemGroup>
+            <ModTranslationFiles Include="$(ProjectDir)translations\*.po" />
+        </ItemGroup>
+        <MakeDir Directories="$(ModInstallPath)\translations" Condition="'@(ModTranslationFiles)' != ''" />
+        <Copy SourceFiles="@(ModTranslationFiles)" DestinationFolder="$(ModInstallPath)\translations" Condition="'@(ModTranslationFiles)' != ''" />
         <Copy SourceFiles="$(ProjectDir)mod.yaml" DestinationFolder="$(ModInstallPath)" Condition="Exists('$(ProjectDir)mod.yaml')" />
     </Target>
 

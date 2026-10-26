@@ -16,8 +16,8 @@ public sealed class CensusScreen : KModalScreen
     private const float TitleHeight = 36f;
     private const float ToggleHeight = 28f;
     private const float SectionHeight = 22f;
-    private const float RowHeight = 44f;
-    private const float IconSize = 36f;
+    private const float RowHeight = 58f;
+    private const float IconSize = 46f;
     private const float HeaderHeight = 24f;
     private const float BoxSize = 16f;
 
@@ -28,7 +28,11 @@ public sealed class CensusScreen : KModalScreen
     private static readonly Color CheckColor = new Color(0.45f, 0.85f, 0.45f, 1f);
     private static readonly Color RowOn = new Color(0.33f, 0.36f, 0.46f, 1f);
     private static readonly float[] ColumnX = { 8f, 80f, 370f, 450f, 710f, 800f, 1050f, 1140f };
-    private static readonly string[] ColumnNames = { "Stage", "Critter", "Origin", "Age / lifespan", "Happiness", "Fertility", "Fullness", "Ailments" };
+    private static string[] ColumnNames => new string[]
+    {
+        STRINGS.UI.COLUMNS.STAGE, STRINGS.UI.COLUMNS.CRITTER, STRINGS.UI.COLUMNS.ORIGIN, STRINGS.UI.COLUMNS.AGE,
+        STRINGS.UI.COLUMNS.HAPPINESS, STRINGS.UI.COLUMNS.FERTILITY, STRINGS.UI.COLUMNS.FULLNESS, STRINGS.UI.COLUMNS.AILMENTS,
+    };
 
     private static CensusScreen current;
 
@@ -216,7 +220,7 @@ public sealed class CensusScreen : KModalScreen
         borderImage.raycastTarget = false;
 
         UiFactory.CreateSpritePanel("Pane title", rect, "web_button", UiStyle.TitleBar, 0f, 0f, LeftWidth, TitleHeight);
-        var title = UiFactory.CreateLabel(rect, Strings.Title, 8f, 8f, 190f, 20f, style: "style_titleTextLarge");
+        var title = UiFactory.CreateLabel(rect, STRINGS.UI.TITLE, 8f, 8f, 190f, 20f, style: "style_titleTextLarge");
         title.fontSize = 18f;
         countLabel = UiFactory.CreateLabel(rect, "", 200f, 8f, 80f, 20f, TMPro.TextAlignmentOptions.Right);
         var close = UiFactory.CreateButton(rect, "X", LeftWidth - 32f, 6f, 24f, 24f, Close);
@@ -247,7 +251,7 @@ public sealed class CensusScreen : KModalScreen
         filters.gameObject.AddComponent<ContentSizeFitter>().verticalFit = ContentSizeFitter.FitMode.PreferredSize;
         ConfigureScroll(viewport, filters);
 
-        AddSection(filters, "Stage");
+        AddSection(filters, STRINGS.UI.FILTERS.STAGE);
         foreach (var stage in new[] { CritterStage.Adult, CritterStage.Baby, CritterStage.Egg })
         {
             var captured = stage;
@@ -264,8 +268,8 @@ public sealed class CensusScreen : KModalScreen
         }
 
         // One toggle per genus actually present in the area.
-        AddSection(filters, "Genus");
-        allToggle = AddToggle(filters, Strings.All + " (" + rows.Count + ")", () =>
+        AddSection(filters, STRINGS.UI.FILTERS.GENUS);
+        allToggle = AddToggle(filters, STRINGS.UI.FILTERS.ALL + " (" + rows.Count + ")", () =>
         {
             genera.Clear();
             Refresh();
@@ -439,7 +443,7 @@ public sealed class CensusScreen : KModalScreen
         countLabel.text = shown.Count + " / " + rows.Count;
         if (rows.Count == 0)
         {
-            AddMessageRow(Strings.Empty);
+            AddMessageRow(STRINGS.UI.EMPTY);
         }
 
         foreach (var row in shown)
@@ -470,7 +474,7 @@ public sealed class CensusScreen : KModalScreen
 
         Cell(holder, 0, StageName(row.Stage));
         Cell(holder, 1, row.Stage == CritterStage.Egg ? row.MorphName + " -> " + row.HatchMorphName : row.MorphName);
-        Cell(holder, 2, row.IsWild ? Strings.Wild : Strings.Tame, CritterTooltips.Wildness(row));
+        Cell(holder, 2, row.IsWild ? STRINGS.UI.ORIGINS.WILD : STRINGS.UI.ORIGINS.TAME, CritterTooltips.Wildness(row));
         Cell(holder, 3, AgeText(row));
         Cell(holder, 4, float.IsNaN(row.Happiness) ? "-" : row.Happiness.ToString("0.0"), CritterTooltips.Happiness(row));
         Cell(holder, 5, ProgressText(row.Fertility, row.FertilityTotalCycles, row.FertilityRemainingCycles), CritterTooltips.Breeding(row));
@@ -482,7 +486,9 @@ public sealed class CensusScreen : KModalScreen
     {
         var width = column == 7 ? 700f : column == 1 ? 250f - IconSize - 4f : column == 3 || column == 5 ? 250f : 80f;
         var x = column == 1 ? ColumnX[1] + IconSize + 4f : ColumnX[column];
-        UiFactory.CreateLabel(holder, text, x, (RowHeight - 20f) / 2f, width, 20f);
+        // Two-line texts (age, fertility) get a taller label; the label centers its lines vertically.
+        var height = text != null && text.Contains('\n') ? 40f : 20f;
+        UiFactory.CreateLabel(holder, text, x, (RowHeight - height) / 2f, width, height);
 
         if (!string.IsNullOrEmpty(tooltip))
         {
@@ -498,11 +504,11 @@ public sealed class CensusScreen : KModalScreen
         switch (stage)
         {
             case CritterStage.Baby:
-                return Strings.Baby;
+                return STRINGS.UI.STAGES.BABY;
             case CritterStage.Egg:
-                return Strings.Egg;
+                return STRINGS.UI.STAGES.EGG;
             default:
-                return Strings.Adult;
+                return STRINGS.UI.STAGES.ADULT;
         }
     }
 
@@ -515,10 +521,12 @@ public sealed class CensusScreen : KModalScreen
             return ProgressText(row.Hatch, row.HatchTotalCycles, row.HatchRemainingCycles);
         }
 
-        return row.Age < 0f ? "-" : Cycles(row.Age) + "/" + Cycles(row.Lifespan) + "(" + Cycles(row.CyclesUntilDeath) + " left)";
+        return row.Age < 0f ? "-" : Cycles(row.Age) + "/" + Cycles(row.Lifespan) + "\n" + Left(row.CyclesUntilDeath);
     }
 
-    private static string Cycles(float value) => value.ToString("0.0") + "cyc";
+    private static string Cycles(float value) => string.Format(STRINGS.UI.FORMATS.CYCLES, value.ToString("0.0"));
+
+    private static string Left(float value) => string.Format(STRINGS.UI.FORMATS.LEFT, Cycles(value));
 
     // "[percent]%/[total]cyc([remaining]cyc left)"; the cycle figures are "-" while the amount isn't progressing.
     private static string ProgressText(float ratio, float total, float remaining)
@@ -529,7 +537,7 @@ public sealed class CensusScreen : KModalScreen
         }
 
         var percent = Mathf.RoundToInt(ratio * 100f) + "%";
-        return total < 0f ? percent + "/-(-)" : percent + "/" + Cycles(total) + "(" + Cycles(remaining) + " left)";
+        return total < 0f ? percent + "/-\n(-)" : percent + "/" + Cycles(total) + "\n" + Left(remaining);
     }
 
     // Closes the modal and shows the clicked critter (or the incubator holding the clicked egg).
