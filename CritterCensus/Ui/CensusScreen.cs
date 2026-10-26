@@ -384,6 +384,13 @@ public sealed class CensusScreen : KModalScreen
         rect.pivot = new Vector2(0f, 0.5f);
         rect.sizeDelta = size.x > 4f && size.y > 4f ? size : new Vector2(BoxSize, BoxSize);
         rect.anchoredPosition = new Vector2(8f, 0f);
+
+        // The checkbox is display only: let clicks on it fall through to the row button behind it.
+        foreach (var graphic in toggle.GetComponentsInChildren<Graphic>(true))
+        {
+            graphic.raycastTarget = false;
+        }
+
         return toggle;
     }
 
