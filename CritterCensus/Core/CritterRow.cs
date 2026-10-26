@@ -24,11 +24,22 @@ public sealed class CritterRow
 
     // Cycles; negative when unknown.
     public float Age = -1f;
+    public float Lifespan = -1f;
     public float CyclesUntilDeath = -1f;
-    public float HatchCycles = -1f;
+
+    // Egg: incubation progress 0..1 and the cycles it takes / has left at the current incubation speed.
+    public float Hatch = -1f;
+    public float HatchTotalCycles = -1f;
+    public float HatchRemainingCycles = -1f;
+
+    // Same for fertility (breeding) at the current fertility speed.
+    public float Fertility = -1f;
+    public float FertilityTotalCycles = -1f;
+    public float FertilityRemainingCycles = -1f;
+
+    public float Happiness = float.NaN;
 
     // 0..1; negative when the critter has no such amount.
-    public float Fertility = -1f;
     public float Fullness = -1f;
 
     public string Ailments;

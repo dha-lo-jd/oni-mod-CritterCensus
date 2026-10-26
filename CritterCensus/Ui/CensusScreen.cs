@@ -27,8 +27,8 @@ public sealed class CensusScreen : KModalScreen
     private static readonly Color BoxColor = new Color(0.12f, 0.13f, 0.17f, 1f);
     private static readonly Color CheckColor = new Color(0.45f, 0.85f, 0.45f, 1f);
     private static readonly Color RowOn = new Color(0.33f, 0.36f, 0.46f, 1f);
-    private static readonly float[] ColumnX = { 8f, 80f, 370f, 450f, 630f, 730f, 830f };
-    private static readonly string[] ColumnNames = { "Stage", "Critter", "Origin", "Age / lifespan", "Fertility", "Fullness", "Ailments" };
+    private static readonly float[] ColumnX = { 8f, 80f, 370f, 450f, 710f, 800f, 1050f, 1140f };
+    private static readonly string[] ColumnNames = { "Stage", "Critter", "Origin", "Age / lifespan", "Happiness", "Fertility", "Fullness", "Ailments" };
 
     private static CensusScreen current;
 
@@ -164,7 +164,7 @@ public sealed class CensusScreen : KModalScreen
 
     public override void OnKeyDown(KButtonEvent e)
     {
-        if (!e.Consumed && e.TryConsume(Action.Escape))
+        if (!e.Consumed && (e.TryConsume(Action.Escape) || e.TryConsume(Action.MouseRight)))
         {
             Close();
         }
@@ -472,14 +472,15 @@ public sealed class CensusScreen : KModalScreen
         Cell(holder, 1, row.Stage == CritterStage.Egg ? row.MorphName + " -> " + row.HatchMorphName : row.MorphName);
         Cell(holder, 2, row.IsWild ? Strings.Wild : Strings.Tame);
         Cell(holder, 3, AgeText(row));
-        Cell(holder, 4, Percent(row.Fertility));
-        Cell(holder, 5, Percent(row.Fullness));
-        Cell(holder, 6, row.Ailments);
+        Cell(holder, 4, float.IsNaN(row.Happiness) ? "-" : row.Happiness.ToString("0.0"));
+        Cell(holder, 5, ProgressText(row.Fertility, row.FertilityTotalCycles, row.FertilityRemainingCycles));
+        Cell(holder, 6, Percent(row.Fullness));
+        Cell(holder, 7, row.Ailments);
     }
 
     private static void Cell(RectTransform holder, int column, string text)
     {
-        var width = column == 6 ? 700f : column == 1 ? 250f - IconSize - 4f : 170f;
+        var width = column == 7 ? 700f : column == 1 ? 250f - IconSize - 4f : column == 3 || column == 5 ? 250f : 80f;
         var x = column == 1 ? ColumnX[1] + IconSize + 4f : ColumnX[column];
         UiFactory.CreateLabel(holder, text, x, (RowHeight - 20f) / 2f, width, 20f);
     }
@@ -503,10 +504,24 @@ public sealed class CensusScreen : KModalScreen
     {
         if (row.Stage == CritterStage.Egg)
         {
-            return row.HatchCycles < 0f ? "-" : "hatches in " + row.HatchCycles.ToString("0.0") + " cycles";
+            return ProgressText(row.Hatch, row.HatchTotalCycles, row.HatchRemainingCycles);
         }
 
-        return row.Age < 0f ? "-" : row.Age.ToString("0.0") + " / " + row.CyclesUntilDeath.ToString("0.0") + " left";
+        return row.Age < 0f ? "-" : Cycles(row.Age) + "/" + Cycles(row.Lifespan) + "(" + Cycles(row.CyclesUntilDeath) + ")";
+    }
+
+    private static string Cycles(float value) => value.ToString("0.0") + "cyc";
+
+    // "[percent]%/[total]cyc([remaining]cyc)"; the cycle figures are "-" while the amount isn't progressing.
+    private static string ProgressText(float ratio, float total, float remaining)
+    {
+        if (ratio < 0f)
+        {
+            return "-";
+        }
+
+        var percent = Mathf.RoundToInt(ratio * 100f) + "%";
+        return total < 0f ? percent + "/-(-)" : percent + "/" + Cycles(total) + "(" + Cycles(remaining) + ")";
     }
 
     // Closes the modal and shows the clicked critter (or the incubator holding the clicked egg).

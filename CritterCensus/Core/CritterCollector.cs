@@ -74,11 +74,20 @@ public static class CritterCollector
         if (age != null)
         {
             row.Age = age.age.value;
+            row.Lifespan = age.age.GetMax();
             row.CyclesUntilDeath = age.CyclesUntilDeath;
         }
 
+        var happiness = go.GetSMI<HappinessMonitor.Instance>();
+        if (happiness != null)
+        {
+            row.Happiness = happiness.happiness.GetTotalValue();
+        }
+
         SetIcon(row, go);
-        row.Fertility = Ratio(Db.Get().Amounts.Fertility.Lookup(go));
+        var fertility = Db.Get().Amounts.Fertility.Lookup(go);
+        row.Fertility = Ratio(fertility);
+        Progress(fertility, out row.FertilityTotalCycles, out row.FertilityRemainingCycles);
         row.Fullness = Ratio(Db.Get().Amounts.Calories.Lookup(go));
         row.Ailments = Ailments(row.Target);
         return row;
@@ -124,11 +133,8 @@ public static class CritterCollector
         var incubation = egg.incubation;
         if (incubation != null)
         {
-            var rate = incubation.GetDelta();
-            if (rate > 0f)
-            {
-                row.HatchCycles = (incubation.GetMax() - incubation.value) / rate / SecondsPerCycle;
-            }
+            row.Hatch = Ratio(incubation);
+            Progress(incubation, out row.HatchTotalCycles, out row.HatchRemainingCycles);
         }
 
         SetIcon(row, go);
@@ -150,6 +156,19 @@ public static class CritterCollector
     {
         var go = Assets.GetPrefab(prefab);
         return go != null ? go.GetProperName() : prefab.ProperName();
+    }
+
+    // Cycles for the amount to fill from empty / from now, at its current speed; -1 when it isn't filling.
+    private static void Progress(AmountInstance amount, out float total, out float remaining)
+    {
+        total = -1f;
+        remaining = -1f;
+        var rate = amount != null ? amount.GetDelta() : 0f;
+        if (rate > 0f)
+        {
+            total = amount.GetMax() / rate / SecondsPerCycle;
+            remaining = Mathf.Max(0f, amount.GetMax() - amount.value) / rate / SecondsPerCycle;
+        }
     }
 
     private static float Ratio(AmountInstance amount)
