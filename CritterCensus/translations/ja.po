@@ -88,6 +88,14 @@ msgctxt "CritterCensus.STRINGS.UI.COLUMNS.FULLNESS"
 msgid "Fullness"
 msgstr "満腹度"
 
+msgctxt "CritterCensus.STRINGS.UI.COLUMNS.FUR"
+msgid "Fur growth"
+msgstr "毛皮の成長率"
+
+msgctxt "CritterCensus.STRINGS.UI.COLUMNS.TEMPERATURE"
+msgid "Temperature"
+msgstr "体温"
+
 msgctxt "CritterCensus.STRINGS.UI.COLUMNS.AILMENTS"
 msgid "Ailments"
 msgstr "状態異常"

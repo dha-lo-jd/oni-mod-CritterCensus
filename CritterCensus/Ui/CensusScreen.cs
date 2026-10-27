@@ -27,12 +27,18 @@ public sealed class CensusScreen : KModalScreen
     private static readonly Color BoxColor = new Color(0.12f, 0.13f, 0.17f, 1f);
     private static readonly Color CheckColor = new Color(0.45f, 0.85f, 0.45f, 1f);
     private static readonly Color ProgressColor = new Color(0.35f, 0.65f, 0.4f, 0.4f);
+    private static readonly Color ProgressTrackColor = new Color(0.12f, 0.25f, 0.15f, 0.6f);
+    private static readonly Color GoodColor = new Color(0.55f, 1f, 0.55f, 1f);
+    private static readonly Color WarnColor = new Color(1f, 0.65f, 0.2f, 1f);
+    private static readonly Color AilmentColor = new Color(1f, 0.6f, 0.6f, 1f);
+    private static readonly Color WildTextColor = new Color(0.85f, 0.6f, 0.8f, 1f);
+    private static readonly Color WildRowColor = new Color(0.36f, 0.26f, 0.34f, 1f);
     private static readonly Color RowOn = new Color(0.33f, 0.36f, 0.46f, 1f);
-    private static readonly float[] ColumnX = { 8f, 80f, 370f, 450f, 710f, 800f, 1050f, 1140f };
+    private static readonly float[] ColumnX = { 8f, 80f, 370f, 450f, 710f, 800f, 1050f, 1140f, 1230f, 1330f };
     private static string[] ColumnNames => new string[]
     {
         STRINGS.UI.COLUMNS.STAGE, STRINGS.UI.COLUMNS.CRITTER, STRINGS.UI.COLUMNS.ORIGIN, STRINGS.UI.COLUMNS.AGE,
-        STRINGS.UI.COLUMNS.HAPPINESS, STRINGS.UI.COLUMNS.FERTILITY, STRINGS.UI.COLUMNS.FULLNESS, STRINGS.UI.COLUMNS.AILMENTS,
+        STRINGS.UI.COLUMNS.HAPPINESS, STRINGS.UI.COLUMNS.FERTILITY, STRINGS.UI.COLUMNS.FULLNESS, STRINGS.UI.COLUMNS.FUR, STRINGS.UI.COLUMNS.TEMPERATURE, STRINGS.UI.COLUMNS.AILMENTS,
     };
 
     private static CensusScreen current;
@@ -456,7 +462,9 @@ public sealed class CensusScreen : KModalScreen
             case 4: return float.IsNaN(row.Happiness) ? null : row.Happiness;
             case 5: return row.Fertility < 0f ? null : row.Fertility;
             case 6: return row.Fullness < 0f ? null : row.Fullness;
-            case 7: return string.IsNullOrEmpty(row.Ailments) ? 0 : row.Ailments.Split(new[] { ", " }, System.StringSplitOptions.None).Length;
+            case 7: return row.FurGrowth < 0f ? null : row.FurGrowth;
+            case 8: return row.Temperature < 0f ? null : row.Temperature;
+            case 9: return string.IsNullOrEmpty(row.Ailments) ? 0 : row.Ailments.Split(new[] { ", " }, System.StringSplitOptions.None).Length;
             default: return null;
         }
     }
@@ -576,6 +584,11 @@ public sealed class CensusScreen : KModalScreen
     {
         var button = UiFactory.CreateButton(content, "", 0f, 0f, 0f, RowHeight, () => Pick(row));
         button.gameObject.AddComponent<LayoutElement>().minHeight = RowHeight;
+        if (row.IsWild)
+        {
+            button.GetComponent<Image>().color = WildRowColor;
+        }
+
         var holder = button.GetComponent<RectTransform>();
         if (row.Icon != null)
         {
@@ -587,29 +600,37 @@ public sealed class CensusScreen : KModalScreen
 
         Cell(holder, 0, StageName(row.Stage));
         Cell(holder, 1, row.Stage == CritterStage.Egg ? row.MorphName + " -> " + row.HatchMorphName : row.MorphName);
-        Cell(holder, 2, row.IsWild ? STRINGS.UI.ORIGINS.WILD : STRINGS.UI.ORIGINS.TAME, CritterTooltips.Wildness(row));
+        Cell(holder, 2, row.IsWild ? STRINGS.UI.ORIGINS.WILD : STRINGS.UI.ORIGINS.TAME, CritterTooltips.Wildness(row), color: row.IsWild ? WildTextColor : (Color?)null);
         Cell(holder, 3, AgeText(row), ratio: AgeRatio(row));
-        Cell(holder, 4, float.IsNaN(row.Happiness) ? "-" : row.Happiness.ToString("0.0"), CritterTooltips.Happiness(row));
+        Cell(holder, 4, float.IsNaN(row.Happiness) ? "-" : row.Happiness.ToString("0.0"), CritterTooltips.Happiness(row), color: HappinessColor(row.Happiness));
         Cell(holder, 5, ProgressText(row.Fertility, row.FertilityTotalCycles, row.FertilityRemainingCycles), CritterTooltips.Breeding(row), row.Fertility);
         Cell(holder, 6, Percent(row.Fullness), CritterTooltips.Fullness(row));
-        Cell(holder, 7, row.Ailments);
+        Cell(holder, 7, Percent(row.FurGrowth));
+        Cell(holder, 8, row.Temperature < 0f ? "-" : GameUtil.GetFormattedTemperature(row.Temperature), color: TemperatureColor(row.TemperatureBand));
+        Cell(holder, 9, row.Ailments, color: AilmentColor);
     }
 
-    private static void Cell(RectTransform holder, int column, string text, string tooltip = null, float ratio = -1f)
+    private static void Cell(RectTransform holder, int column, string text, string tooltip = null, float ratio = -1f, Color? color = null)
     {
         // Progress bar behind the text (age / lifespan, hatch progress, fertility).
         if (ratio >= 0f && column + 1 < ColumnX.Length)
         {
             var barWidth = ColumnX[column + 1] - ColumnX[column] - 8f;
+            var track = UiFactory.CreatePanel("Progress track", holder, ProgressTrackColor, ColumnX[column] - 2f, 4f, barWidth, RowHeight - 8f);
+            track.raycastTarget = false;
             var bar = UiFactory.CreatePanel("Progress", holder, ProgressColor, ColumnX[column] - 2f, 4f, barWidth * Mathf.Clamp01(ratio), RowHeight - 8f);
             bar.raycastTarget = false;
         }
 
-        var width = column == 7 ? 700f : column == 1 ? 250f - IconSize - 4f : column == 3 || column == 5 ? 250f : 80f;
+        var width = column == 9 ? 700f : column == 1 ? 250f - IconSize - 4f : column == 3 || column == 5 ? 250f : 80f;
         var x = column == 1 ? ColumnX[1] + IconSize + 4f : ColumnX[column];
         // Two-line texts (age, fertility) get a taller label; the label centers its lines vertically.
         var height = text != null && text.Contains('\n') ? 40f : 20f;
-        UiFactory.CreateLabel(holder, text, x, (RowHeight - height) / 2f, width, height);
+        var label = UiFactory.CreateLabel(holder, text, x, (RowHeight - height) / 2f, width, height);
+        if (color.HasValue)
+        {
+            label.color = color.Value;
+        }
 
         if (!string.IsNullOrEmpty(tooltip))
         {
@@ -634,6 +655,29 @@ public sealed class CensusScreen : KModalScreen
     }
 
     private static string Percent(float ratio) => ratio < 0f ? "-" : Mathf.RoundToInt(ratio * 100f) + "%";
+
+    private static Color? HappinessColor(float happiness)
+    {
+        if (float.IsNaN(happiness) || happiness == 0f)
+        {
+            return null;
+        }
+
+        return happiness > 0f ? GoodColor : WarnColor;
+    }
+
+    private static Color? TemperatureColor(TemperatureBand band)
+    {
+        switch (band)
+        {
+            case TemperatureBand.Comfortable: return GoodColor;
+            case TemperatureBand.Hot: return WarnColor;
+            case TemperatureBand.HotDeadly: return new Color(1f, 0.25f, 0.25f, 1f);
+            case TemperatureBand.Cold: return new Color(0.55f, 0.85f, 1f, 1f);
+            case TemperatureBand.ColdDeadly: return new Color(0.3f, 0.45f, 1f, 1f);
+            default: return null;
+        }
+    }
 
     // Progress shown behind the age cell: hatch progress for eggs, age / lifespan otherwise.
     private static float AgeRatio(CritterRow row)

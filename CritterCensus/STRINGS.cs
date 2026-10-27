@@ -39,6 +39,8 @@ public static class STRINGS
             public static LocString HAPPINESS = "Happiness";
             public static LocString FERTILITY = "Fertility";
             public static LocString FULLNESS = "Fullness";
+            public static LocString FUR = "Fur growth";
+            public static LocString TEMPERATURE = "Temperature";
             public static LocString AILMENTS = "Ailments";
         }
 

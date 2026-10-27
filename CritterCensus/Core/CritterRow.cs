@@ -10,6 +10,16 @@ public enum CritterStage
 }
 
 // Snapshot of one critter or egg taken when the census opens.
+public enum TemperatureBand
+{
+    Unknown,
+    Comfortable,
+    Hot,
+    HotDeadly,
+    Cold,
+    ColdDeadly
+}
+
 public sealed class CritterRow
 {
     public CritterStage Stage;
@@ -41,6 +51,13 @@ public sealed class CritterRow
 
     // 0..1; negative when the critter has no such amount.
     public float Fullness = -1f;
+
+    // Fur / scale growth 0..1; negative when the critter has none.
+    public float FurGrowth = -1f;
+
+    // Body temperature in kelvin (negative when unknown) and where it sits against the critter's comfort limits.
+    public float Temperature = -1f;
+    public TemperatureBand TemperatureBand;
 
     public string Ailments;
 

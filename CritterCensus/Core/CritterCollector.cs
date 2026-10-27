@@ -90,8 +90,44 @@ public static class CritterCollector
         row.Fertility = Ratio(fertility);
         Progress(fertility, out row.FertilityTotalCycles, out row.FertilityRemainingCycles);
         row.Fullness = Ratio(Db.Get().Amounts.Calories.Lookup(go));
+        row.FurGrowth = Ratio(Db.Get().Amounts.ScaleGrowth.Lookup(go));
+        SetTemperature(row, go);
         row.Ailments = Ailments(row.Target);
         return row;
+    }
+
+    // Body temperature against the comfort (uncomfortable) and deadly limits of the critter's temperature monitor.
+    private static void SetTemperature(CritterRow row, GameObject go)
+    {
+        var element = go.GetComponent<PrimaryElement>();
+        var def = go.GetDef<CritterTemperatureMonitor.Def>();
+        if (element == null || def == null)
+        {
+            return;
+        }
+
+        var kelvin = element.Temperature;
+        row.Temperature = kelvin;
+        if (kelvin > def.temperatureHotDeadly)
+        {
+            row.TemperatureBand = TemperatureBand.HotDeadly;
+        }
+        else if (kelvin > def.temperatureHotUncomfortable)
+        {
+            row.TemperatureBand = TemperatureBand.Hot;
+        }
+        else if (kelvin < def.temperatureColdDeadly)
+        {
+            row.TemperatureBand = TemperatureBand.ColdDeadly;
+        }
+        else if (kelvin < def.temperatureColdUncomfortable)
+        {
+            row.TemperatureBand = TemperatureBand.Cold;
+        }
+        else
+        {
+            row.TemperatureBand = TemperatureBand.Comfortable;
+        }
     }
 
     private static CritterRow BuildEggRow(IncubationMonitor.Instance egg, GameObject holder)
@@ -140,6 +176,7 @@ public static class CritterCollector
         }
 
         SetIcon(row, go);
+        SetTemperature(row, go);
         row.Ailments = Ailments(go.GetComponent<KSelectable>());
         return row;
     }
