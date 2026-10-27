@@ -26,6 +26,7 @@ public sealed class CensusScreen : KModalScreen
 
     private static readonly Color BoxColor = new Color(0.12f, 0.13f, 0.17f, 1f);
     private static readonly Color CheckColor = new Color(0.45f, 0.85f, 0.45f, 1f);
+    private static readonly Color ProgressColor = new Color(0.35f, 0.65f, 0.4f, 0.4f);
     private static readonly Color RowOn = new Color(0.33f, 0.36f, 0.46f, 1f);
     private static readonly float[] ColumnX = { 8f, 80f, 370f, 450f, 710f, 800f, 1050f, 1140f };
     private static string[] ColumnNames => new string[]
@@ -587,15 +588,23 @@ public sealed class CensusScreen : KModalScreen
         Cell(holder, 0, StageName(row.Stage));
         Cell(holder, 1, row.Stage == CritterStage.Egg ? row.MorphName + " -> " + row.HatchMorphName : row.MorphName);
         Cell(holder, 2, row.IsWild ? STRINGS.UI.ORIGINS.WILD : STRINGS.UI.ORIGINS.TAME, CritterTooltips.Wildness(row));
-        Cell(holder, 3, AgeText(row));
+        Cell(holder, 3, AgeText(row), ratio: AgeRatio(row));
         Cell(holder, 4, float.IsNaN(row.Happiness) ? "-" : row.Happiness.ToString("0.0"), CritterTooltips.Happiness(row));
-        Cell(holder, 5, ProgressText(row.Fertility, row.FertilityTotalCycles, row.FertilityRemainingCycles), CritterTooltips.Breeding(row));
+        Cell(holder, 5, ProgressText(row.Fertility, row.FertilityTotalCycles, row.FertilityRemainingCycles), CritterTooltips.Breeding(row), row.Fertility);
         Cell(holder, 6, Percent(row.Fullness), CritterTooltips.Fullness(row));
         Cell(holder, 7, row.Ailments);
     }
 
-    private static void Cell(RectTransform holder, int column, string text, string tooltip = null)
+    private static void Cell(RectTransform holder, int column, string text, string tooltip = null, float ratio = -1f)
     {
+        // Progress bar behind the text (age / lifespan, hatch progress, fertility).
+        if (ratio >= 0f && column + 1 < ColumnX.Length)
+        {
+            var barWidth = ColumnX[column + 1] - ColumnX[column] - 8f;
+            var bar = UiFactory.CreatePanel("Progress", holder, ProgressColor, ColumnX[column] - 2f, 4f, barWidth * Mathf.Clamp01(ratio), RowHeight - 8f);
+            bar.raycastTarget = false;
+        }
+
         var width = column == 7 ? 700f : column == 1 ? 250f - IconSize - 4f : column == 3 || column == 5 ? 250f : 80f;
         var x = column == 1 ? ColumnX[1] + IconSize + 4f : ColumnX[column];
         // Two-line texts (age, fertility) get a taller label; the label centers its lines vertically.
@@ -625,6 +634,17 @@ public sealed class CensusScreen : KModalScreen
     }
 
     private static string Percent(float ratio) => ratio < 0f ? "-" : Mathf.RoundToInt(ratio * 100f) + "%";
+
+    // Progress shown behind the age cell: hatch progress for eggs, age / lifespan otherwise.
+    private static float AgeRatio(CritterRow row)
+    {
+        if (row.Stage == CritterStage.Egg)
+        {
+            return row.Hatch;
+        }
+
+        return row.Age < 0f || row.Lifespan <= 0f ? -1f : row.Age / row.Lifespan;
+    }
 
     private static string AgeText(CritterRow row)
     {
