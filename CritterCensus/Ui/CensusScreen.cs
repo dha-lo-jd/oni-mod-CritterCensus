@@ -30,15 +30,16 @@ public sealed class CensusScreen : KModalScreen
     private static readonly Color ProgressTrackColor = new Color(0.12f, 0.25f, 0.15f, 0.6f);
     private static readonly Color GoodColor = new Color(0.55f, 1f, 0.55f, 1f);
     private static readonly Color WarnColor = new Color(1f, 0.65f, 0.2f, 1f);
+    private static readonly Color DyingColor = new Color(1f, 0.25f, 0.25f, 1f);
     private static readonly Color AilmentColor = new Color(1f, 0.6f, 0.6f, 1f);
     private static readonly Color WildTextColor = new Color(0.85f, 0.6f, 0.8f, 1f);
     private static readonly Color WildRowColor = new Color(0.36f, 0.26f, 0.34f, 1f);
     private static readonly Color RowOn = new Color(0.33f, 0.36f, 0.46f, 1f);
-    private static readonly float[] ColumnX = { 8f, 80f, 370f, 450f, 710f, 800f, 1050f, 1140f, 1230f, 1330f };
+    private static readonly float[] ColumnX = { 8f, 80f, 370f, 450f, 710f, 800f, 1050f, 1140f, 1230f, 1330f, 1420f };
     private static string[] ColumnNames => new string[]
     {
         STRINGS.UI.COLUMNS.STAGE, STRINGS.UI.COLUMNS.CRITTER, STRINGS.UI.COLUMNS.ORIGIN, STRINGS.UI.COLUMNS.AGE,
-        STRINGS.UI.COLUMNS.HAPPINESS, STRINGS.UI.COLUMNS.FERTILITY, STRINGS.UI.COLUMNS.FULLNESS, STRINGS.UI.COLUMNS.FUR, STRINGS.UI.COLUMNS.TEMPERATURE, STRINGS.UI.COLUMNS.AILMENTS,
+        STRINGS.UI.COLUMNS.HAPPINESS, STRINGS.UI.COLUMNS.FERTILITY, STRINGS.UI.COLUMNS.FULLNESS, STRINGS.UI.COLUMNS.FUR, STRINGS.UI.COLUMNS.TEMPERATURE, STRINGS.UI.COLUMNS.VITALITY, STRINGS.UI.COLUMNS.AILMENTS,
     };
 
     private static CensusScreen current;
@@ -464,7 +465,8 @@ public sealed class CensusScreen : KModalScreen
             case 6: return row.Fullness < 0f ? null : row.Fullness;
             case 7: return row.FurGrowth < 0f ? null : row.FurGrowth;
             case 8: return row.Temperature < 0f ? null : row.Temperature;
-            case 9: return string.IsNullOrEmpty(row.Ailments) ? 0 : row.Ailments.Split(new[] { ", " }, System.StringSplitOptions.None).Length;
+            case 9: return row.Health < 0f ? null : row.Health;
+            case 10: return string.IsNullOrEmpty(row.Ailments) ? 0 : row.Ailments.Split(new[] { ", " }, System.StringSplitOptions.None).Length;
             default: return null;
         }
     }
@@ -607,7 +609,8 @@ public sealed class CensusScreen : KModalScreen
         Cell(holder, 6, Percent(row.Fullness), CritterTooltips.Fullness(row));
         Cell(holder, 7, Percent(row.FurGrowth));
         Cell(holder, 8, row.Temperature < 0f ? "-" : GameUtil.GetFormattedTemperature(row.Temperature), color: TemperatureColor(row.TemperatureBand));
-        Cell(holder, 9, row.Ailments, color: AilmentColor);
+        Cell(holder, 9, row.Health < 0f ? "-" : Mathf.Ceil(row.Health) + "/" + Mathf.Ceil(row.HealthMax), color: row.Health < 0f ? (Color?)null : row.Dying ? DyingColor : GoodColor);
+        Cell(holder, 10, row.Ailments, color: AilmentColor);
     }
 
     private static void Cell(RectTransform holder, int column, string text, string tooltip = null, float ratio = -1f, Color? color = null)
@@ -622,7 +625,7 @@ public sealed class CensusScreen : KModalScreen
             bar.raycastTarget = false;
         }
 
-        var width = column == 9 ? 700f : column == 1 ? 250f - IconSize - 4f : column == 3 || column == 5 ? 250f : 80f;
+        var width = column == 10 ? 700f : column == 1 ? 250f - IconSize - 4f : column == 3 || column == 5 ? 250f : 80f;
         var x = column == 1 ? ColumnX[1] + IconSize + 4f : ColumnX[column];
         // Two-line texts (age, fertility) get a taller label; the label centers its lines vertically.
         var height = text != null && text.Contains('\n') ? 40f : 20f;

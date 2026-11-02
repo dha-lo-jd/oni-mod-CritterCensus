@@ -92,6 +92,14 @@ public static class CritterCollector
         row.Fullness = Ratio(Db.Get().Amounts.Calories.Lookup(go));
         row.FurGrowth = Ratio(Db.Get().Amounts.ScaleGrowth.Lookup(go));
         SetTemperature(row, go);
+        var health = go.GetComponent<Health>();
+        if (health != null)
+        {
+            row.Health = health.hitPoints;
+            row.HealthMax = health.maxHitPoints;
+            row.Dying = health.State == Health.HealthState.Critical || health.State == Health.HealthState.Incapacitated;
+        }
+
         row.Ailments = Ailments(row.Target);
         return row;
     }

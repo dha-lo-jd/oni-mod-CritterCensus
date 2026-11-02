@@ -59,6 +59,11 @@ public sealed class CritterRow
     public float Temperature = -1f;
     public TemperatureBand TemperatureBand;
 
+    // Hit points and their maximum (negative when there is no health); dying is the critical / incapacitated state.
+    public float Health = -1f;
+    public float HealthMax = -1f;
+    public bool Dying;
+
     public string Ailments;
 
     // Default "ui" pose of this critter's prefab, as the game shows it in its own lists.
