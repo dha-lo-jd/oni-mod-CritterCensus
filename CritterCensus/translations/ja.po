@@ -14,7 +14,7 @@ msgstr ""
 
 msgctxt "CritterCensus.STRINGS.UI.TOOL_NAME"
 msgid "Critter Census"
-msgstr "生き物センサス"
+msgstr "クリッター調査"
 
 msgctxt "CritterCensus.STRINGS.UI.TOOL_TOOLTIP"
 msgid "Drag to list the critters and eggs in an area"
@@ -22,7 +22,7 @@ msgstr "ドラッグした範囲内の生き物と卵を一覧表示します"
 
 msgctxt "CritterCensus.STRINGS.UI.TITLE"
 msgid "Critter Census"
-msgstr "生き物センサス"
+msgstr "クリッター調査"
 
 msgctxt "CritterCensus.STRINGS.UI.EMPTY"
 msgid "No critters or eggs in the selected area."
