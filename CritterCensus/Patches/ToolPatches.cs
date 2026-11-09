@@ -78,6 +78,24 @@ public static class CompareActionKeyCodesPatch
     }
 }
 
+// The tool menu builds the button tooltip with the hotkey text of its action. Vanilla looks the action up in the key
+// bindings and throws when it is missing; our unbound NumActions can be missing there (e.g. after a mod that added
+// bindings was disabled), so give it an empty hotkey text instead.
+[HarmonyPatch(typeof(GameUtil), nameof(GameUtil.GetHotkeyString))]
+public static class GetHotkeyStringPatch
+{
+    public static bool Prefix(Action action, ref string __result)
+    {
+        if (action == Action.NumActions)
+        {
+            __result = "";
+            return false;
+        }
+
+        return true;
+    }
+}
+
 // Rooms overlay: clicking a stable (creature pen) takes the census of that room instead of selecting.
 [HarmonyPatch(typeof(SelectTool), nameof(SelectTool.OnLeftClickDown))]
 public static class SelectToolRoomClickPatch
