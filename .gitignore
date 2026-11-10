@@ -8,3 +8,5 @@ Local.Build.props
 .idea/
 .claude/
 .junie/
+
+release/
