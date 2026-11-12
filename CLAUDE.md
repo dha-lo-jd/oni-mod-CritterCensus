@@ -3,7 +3,9 @@
 ONI mod（Census シリーズ。兄弟は `../PlantCensus`）。Build: `dotnet build` (Debug copies to `ModInstallPath` from `Local.Build.props`). 共通事項は HQ（親フォルダ）の `CLAUDE.md`。
 
 - `PlantCensus` はこの Mod を写して作った。`Ui/`（`UiFactory`、`UiStyle`、`ModalScreens`）と `Selection/` は同じ内容で、名前空間だけが違う。直すときは兄弟側にも同じ問題がないか見る。
-- ツールボタンのアイコンは `Ui/ToolIcon.cs`。`CritterCensus/ModAssets/tool_icon.png` を読み、`Assets.Sprites` に自分の名前で登録する。ファイルがなければ捕獲ツールのアイコン名を返す。Debug ビルドは `ModAssets/*.png` を Mod フォルダへコピーする。**Release ビルドの配布フォルダ（`release/`）を作る設定がまだない**ので、Workshop へ上げるときはこの画像を含めること。
+- ツールボタンのアイコンは `Ui/ToolIcon.cs`。`CritterCensus/ModAssets/tool_icon.png` を読み、`Assets.Sprites` に自分の名前で登録する。ファイルがなければ捕獲ツールのアイコン名を返す。
+- **配布物**: `dotnet build -c Release` が `release/CritterCensus`（git 管理外）に配布用フォルダを作る（DLL（pdb なし）、`mod.yaml`、`mod_info.yaml`、`Workshop/preview.png`、`translations/*.po`、`ModAssets/*.png`）。Release ビルドは `ModInstallPath`（実機の mods フォルダ）へはコピーしない。Debug ビルドだけがコピーする。構成は `PlantCensus` と同じ。
+- Workshop のサムネイルは `Workshop/preview.png`（320×320）。以前は git 管理外の `release/` にしかなかったので、ここへ移した。
 - アイコンの元画像は HQ の `_Incoming/CritterCensus/2026-11-13-icon-tool-3/`（候補 2 案。採用は案 2 のオフホワイトの枠）。加工は `tools/asset.py`（HQ の `ASSETS.md`）。
 
 ## 実機検証

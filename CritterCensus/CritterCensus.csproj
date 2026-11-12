@@ -83,7 +83,14 @@
         <NoWarn>$(NoWarn);MSB3277</NoWarn>
     </PropertyGroup>
 
-    <Target Name="PostBuild" AfterTargets="PostBuildEvent" Condition="'$(ModInstallPath)' != ''">
+    <!-- No pdb in Release builds. -->
+    <PropertyGroup Condition="'$(Configuration)' == 'Release'">
+        <DebugType>none</DebugType>
+        <DebugSymbols>false</DebugSymbols>
+    </PropertyGroup>
+
+    <!-- Debug builds go to the local mods folder (ModInstallPath) for development. -->
+    <Target Name="PostBuild" AfterTargets="PostBuildEvent" Condition="'$(ModInstallPath)' != '' and '$(Configuration)' != 'Release'">
         <MakeDir Directories="$(ModInstallPath)" />
         <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(ModInstallPath)" />
         <Copy SourceFiles="$(TargetDir)$(TargetName).pdb" DestinationFolder="$(ModInstallPath)" Condition="Exists('$(TargetDir)$(TargetName).pdb')" />
@@ -99,6 +106,24 @@
         </ItemGroup>
         <MakeDir Directories="$(ModInstallPath)\ModAssets" Condition="'@(ModAssetFiles)' != ''" />
         <Copy SourceFiles="@(ModAssetFiles)" DestinationFolder="$(ModInstallPath)\ModAssets" Condition="'@(ModAssetFiles)' != ''" />
+    </Target>
+
+    <!-- Release builds produce a clean distribution folder: <repo>\release\CritterCensus (git-ignored). -->
+    <Target Name="PackageRelease" AfterTargets="Build" Condition="'$(Configuration)' == 'Release'">
+        <PropertyGroup>
+            <ReleaseDir>$(ProjectDir)..\release\$(TargetName)</ReleaseDir>
+        </PropertyGroup>
+        <ItemGroup>
+            <ReleaseTranslationFiles Include="$(ProjectDir)translations\*.po" />
+            <ReleaseAssetFiles Include="$(ProjectDir)ModAssets\*.png" />
+        </ItemGroup>
+        <RemoveDir Directories="$(ReleaseDir)" />
+        <MakeDir Directories="$(ReleaseDir)" />
+        <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(ReleaseDir)" />
+        <Copy SourceFiles="$(ProjectDir)mod.yaml;$(ProjectDir)mod_info.yaml" DestinationFolder="$(ReleaseDir)" />
+        <Copy SourceFiles="$(ProjectDir)..\Workshop\preview.png" DestinationFolder="$(ReleaseDir)" Condition="Exists('$(ProjectDir)..\Workshop\preview.png')" />
+        <Copy SourceFiles="@(ReleaseTranslationFiles)" DestinationFolder="$(ReleaseDir)\translations" Condition="'@(ReleaseTranslationFiles)' != ''" />
+        <Copy SourceFiles="@(ReleaseAssetFiles)" DestinationFolder="$(ReleaseDir)\ModAssets" Condition="'@(ReleaseAssetFiles)' != ''" />
     </Target>
 
 </Project>
