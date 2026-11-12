@@ -1,0 +1,5 @@
+{
+  "build": ["dotnet build CritterCensus.sln -v q -p:ModInstallPath=F:/_System/Documents/Klei/OxygenNotIncluded/mods/local/CritterCensus"],
+  "required_mods": ["CritterCensus.Local"],
+  "save": "05 all research.sav"
+}

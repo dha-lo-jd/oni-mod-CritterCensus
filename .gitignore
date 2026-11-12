@@ -10,3 +10,4 @@ Local.Build.props
 .junie/
 
 release/
+.harness-runs/

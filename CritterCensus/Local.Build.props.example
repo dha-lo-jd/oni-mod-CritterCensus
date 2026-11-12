@@ -2,5 +2,6 @@
     <PropertyGroup>
         <GameManagedPath>C:\Path\To\OxygenNotIncluded\OxygenNotIncluded_Data\Managed</GameManagedPath>
         <ModInstallPath>C:\Path\To\mods\local\CritterCensus</ModInstallPath>
+        <HarnessDllPath>C:\Path\To\GravitasTestHarness\Gravitas.TestHarness\bin\Debug\netstandard2.1\Gravitas.TestHarness.dll</HarnessDllPath>
     </PropertyGroup>
 </Project>

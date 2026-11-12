@@ -45,6 +45,9 @@
         <Reference Include="UnityEngine.UIModule">
             <HintPath>$(GameManagedPath)\UnityEngine.UIModule.dll</HintPath>
         </Reference>
+        <Reference Include="UnityEngine.ImageConversionModule">
+            <HintPath>$(GameManagedPath)\UnityEngine.ImageConversionModule.dll</HintPath>
+        </Reference>
         <Reference Include="UnityEngine.UI">
             <HintPath>$(GameManagedPath)\UnityEngine.UI.dll</HintPath>
         </Reference>
@@ -53,6 +56,17 @@
         </Reference>
         <Reference Include="UnityEngine.InputLegacyModule">
             <HintPath>$(GameManagedPath)\UnityEngine.InputLegacyModule.dll</HintPath>
+        </Reference>
+    </ItemGroup>
+
+    <!-- In-game tests (Debug only, when HarnessDllPath is set) use Check/Arrange from Gravitas.TestHarness. -->
+    <PropertyGroup Condition="'$(Configuration)' == 'Debug' and '$(HarnessDllPath)' != ''">
+        <DefineConstants>$(DefineConstants);HARNESS</DefineConstants>
+    </PropertyGroup>
+    <ItemGroup Condition="'$(Configuration)' == 'Debug' and '$(HarnessDllPath)' != ''">
+        <Reference Include="Gravitas.TestHarness">
+            <HintPath>$(HarnessDllPath)</HintPath>
+            <Private>false</Private>
         </Reference>
     </ItemGroup>
 
@@ -80,6 +94,11 @@
         <MakeDir Directories="$(ModInstallPath)\translations" Condition="'@(ModTranslationFiles)' != ''" />
         <Copy SourceFiles="@(ModTranslationFiles)" DestinationFolder="$(ModInstallPath)\translations" Condition="'@(ModTranslationFiles)' != ''" />
         <Copy SourceFiles="$(ProjectDir)mod.yaml" DestinationFolder="$(ModInstallPath)" Condition="Exists('$(ProjectDir)mod.yaml')" />
+        <ItemGroup>
+            <ModAssetFiles Include="$(ProjectDir)ModAssets\*.png" />
+        </ItemGroup>
+        <MakeDir Directories="$(ModInstallPath)\ModAssets" Condition="'@(ModAssetFiles)' != ''" />
+        <Copy SourceFiles="@(ModAssetFiles)" DestinationFolder="$(ModInstallPath)\ModAssets" Condition="'@(ModAssetFiles)' != ''" />
     </Target>
 
 </Project>
