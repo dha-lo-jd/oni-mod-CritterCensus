@@ -4,7 +4,7 @@ ONI mod（Census シリーズ。兄弟は `../PlantCensus`）。Build: `dotnet b
 
 - `PlantCensus` はこの Mod を写して作った。`Ui/`（`UiFactory`、`UiStyle`、`ModalScreens`）と `Selection/` は同じ内容で、名前空間だけが違う。直すときは兄弟側にも同じ問題がないか見る。
 - ツールボタンのアイコンは `Ui/ToolIcon.cs`。`CritterCensus/ModAssets/tool_icon.png` を読み、`Assets.Sprites` に自分の名前で登録する。ファイルがなければ捕獲ツールのアイコン名を返す。Debug ビルドは `ModAssets/*.png` を Mod フォルダへコピーする。**Release ビルドの配布フォルダ（`release/`）を作る設定がまだない**ので、Workshop へ上げるときはこの画像を含めること。
-- アイコンの元画像は HQ の `_Incoming/CritterCensus/2026-11-13-icon-tool-3/`（候補 2 案。採用は案 1 の赤い枠）。加工は `tools/asset.py`（HQ の `ASSETS.md`）。
+- アイコンの元画像は HQ の `_Incoming/CritterCensus/2026-11-13-icon-tool-3/`（候補 2 案。採用は案 2 のオフホワイトの枠）。加工は `tools/asset.py`（HQ の `ASSETS.md`）。
 
 ## 実機検証
 ONI 実機で検証するには Gravitas.TestHarness を使う。テストは `[HarnessTest]` を付けた static メソッドとして書く（`CritterCensus/HarnessTests.cs`、`#if DEBUG && HARNESS`。`HARNESS` は `Local.Build.props` に `HarnessDllPath` があるときだけ定義される）。
