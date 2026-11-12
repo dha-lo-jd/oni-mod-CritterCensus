@@ -7,7 +7,7 @@ namespace CritterCensus;
 
 public sealed class CritterCensusMod : UserMod2
 {
-    private static string modPath;
+    internal static string modPath;
 
     public override void OnLoad(Harmony harmony)
     {

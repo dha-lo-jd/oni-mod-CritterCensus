@@ -55,7 +55,7 @@ public static class ToolMenuCreateBasicToolsPatch
             return;
         }
 
-        var collection = ToolMenu.CreateToolCollection(STRINGS.UI.TOOL_NAME, "icon_action_capture", Action.NumActions,
+        var collection = ToolMenu.CreateToolCollection(STRINGS.UI.TOOL_NAME, ToolIcon.Resolve(), Action.NumActions,
             CensusTool.ToolName, STRINGS.UI.TOOL_TOOLTIP, largeIcon: false);
         var index = __instance.basicTools.FindIndex(c => c.tools.Count > 0 && c.tools[0].toolName == "CaptureTool");
         __instance.basicTools.Insert(index >= 0 ? index + 1 : __instance.basicTools.Count, collection);
