@@ -5,7 +5,7 @@ ONI mod（Census シリーズ。兄弟は `../PlantCensus`）。Build: `dotnet b
 - `PlantCensus` はこの Mod を写して作った。`Ui/`（`UiFactory`、`UiStyle`、`ModalScreens`）と `Selection/` は同じ内容で、名前空間だけが違う。直すときは兄弟側にも同じ問題がないか見る。
 - ツールボタンのアイコンは `Ui/ToolIcon.cs`。`CritterCensus/ModAssets/tool_icon.png` を読み、`Assets.Sprites` に自分の名前で登録する。ファイルがなければ捕獲ツールのアイコン名を返す。
 - **配布物**: `dotnet build -c Release` が `release/CritterCensus`（git 管理外）に配布用フォルダを作る（DLL（pdb なし）、`mod.yaml`、`mod_info.yaml`、`Workshop/preview.png`、`translations/*.po`、`ModAssets/*.png`）。Release ビルドは `ModInstallPath`（実機の mods フォルダ）へはコピーしない。Debug ビルドだけがコピーする。構成は `PlantCensus` と同じ。
-- **Workshop の文章**: 説明文は `Workshop/description.en.bbcode.txt` と `description.ja.bbcode.txt`（公開中のものを取り込んだ。日本語は Steam のサイトの言語を日本語にすると見える）、更新履歴は `CHANGELOG.md`（版ごとに English / 日本語のブロックがあり、そのまま Workshop の変更ノートに貼れる）。**先にこれらを直し、あとで Steam に反映する**（Steam 側だけ直すとずれる）。版を上げたら `CHANGELOG.md` に書く。
+- **Workshop の文章**: 説明文は `Workshop/description.en.bbcode.txt` と `description.ja.bbcode.txt`（公開中のものを取り込んだ。日本語は Steam のサイトの言語を日本語にすると見える）、更新履歴は `Workshop/changelog.bbcode.txt`（BBCode。版ごとの `[h2]` の下に English / 日本語の `[list]` があり、その版の部分をそのまま Workshop の変更ノートに貼れる）。**先にこれらを直し、あとで Steam に反映する**（Steam 側だけ直すとずれる）。版を上げたら更新履歴に書く。公開していない版（1.0.0、1.0.2）は載せない。
 - Workshop のサムネイルは `Workshop/preview.png`（320×320）。以前は git 管理外の `release/` にしかなかったので、ここへ移した。
 - アイコンの元画像は HQ の `_Incoming/CritterCensus/2026-11-13-icon-tool-3/`（候補 2 案。採用は案 2 のオフホワイトの枠）。加工は `tools/asset.py`（HQ の `ASSETS.md`）。
 

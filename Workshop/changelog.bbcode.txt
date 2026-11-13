@@ -1,0 +1,25 @@
+[h1]Changelog / 更新履歴[/h1]
+
+[h2]1.0.3[/h2]
+[b]English[/b]
+[list]
+[*] Fixed an IndexOutOfRangeException thrown on every key press (the census button has no hotkey).
+[*] Fixed the mod's patches being applied twice.
+[*] New tool icon for the census button.
+[/list]
+[b]日本語[/b]
+[list]
+[*] キーを押すたびに IndexOutOfRangeException が出る問題を修正しました（調査ボタンにはホットキーがありません）。
+[*] Mod のパッチが二重に適用されていた問題を修正しました。
+[*] 調査ボタンに専用のアイコンを追加しました。
+[/list]
+
+[h2]1.0.1[/h2]
+[b]English[/b]
+[list]
+[*] First release: the census tool, the Stable (Creature Pen) click in the Rooms overlay, the full-screen list (stage, species, age, happiness, fertility, fullness, fur growth, temperature, vitality, ailments) with filters, sorting and row click to jump, and the Japanese translation.
+[/list]
+[b]日本語[/b]
+[list]
+[*] 初回公開: 調査ツール、部屋オーバーレイでの飼育小屋のクリック、全画面の一覧（成長段階、種、年齢、幸福度、繁殖率、満腹度、毛皮の成長率、体温、生命力、状態異常）、絞り込み・並べ替え・行クリックで移動、日本語訳。
+[/list]
