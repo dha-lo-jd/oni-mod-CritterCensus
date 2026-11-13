@@ -1,0 +1,35 @@
+[h1]Critter Census[/h1]
+
+Pick an area and get a full-screen overview of every critter and egg in it — stage, species, morph, wild/tame, age, happiness, fertility, fullness, fur growth, temperature, vitality and ailments, all in one sortable list.
+
+[h2]How to open it[/h2]
+[list]
+[*] [b]Census tool[/b] — click the new button in the tool menu (next to the Wrangle tool) and drag a box over the area.
+[*] [b]Rooms overlay[/b] — in the Rooms overlay, click a [b]Stable (Creature Pen)[/b] to take the census of that whole room.
+[/list]
+
+[h2]What you see[/h2]
+[list]
+[*] [b]Stage[/b]: adult / baby / egg. Eggs show the morph they will hatch into.
+[*] [b]Critter[/b] with a small icon, [b]wild / tame[/b], and [b]age / lifespan[/b] with the remaining cycles. For eggs, the hatch progress.
+[*] [b]Happiness[/b] (green above 0, orange below 0), [b]fertility[/b] with the cycles to the next egg, [b]fullness[/b], [b]fur growth[/b].
+[*] [b]Temperature[/b], colored by comfort: green when comfortable, orange / red above, light blue / blue below.
+[*] [b]Vitality[/b] (red when dying) and the critter's [b]ailments[/b].
+[*] Progress bars behind the age and fertility cells. Wild critters get a purple-tinted row.
+[*] Hover tooltips: egg chances per morph, the happiness modifier breakdown, current calories, and the wildness level and its change.
+[/list]
+
+[h2]Filter, sort, jump[/h2]
+[list]
+[*] Left pane: toggle [b]stage[/b] and [b]species[/b] filters (with counts) or pick [b]All[/b].
+[*] Click a column header to sort: ascending → descending → off.
+[*] Click a row to close the window, move the camera to that critter and select it. Eggs in an incubator select the incubator.
+[*] Close with Esc, right-click, the X button, or by opening any other management screen. The list is a snapshot taken when the window opens.
+[/list]
+
+[h2]Notes[/h2]
+[list]
+[*] Japanese translation included.
+[*] Works on existing saves and can be added or removed at any time (it stores nothing in the save).
+[*] Source: [url=https://github.com/dha-lo-jd/oni-mod-CritterCensus]GitHub[/url]
+[/list]
