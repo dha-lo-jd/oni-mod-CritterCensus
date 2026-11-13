@@ -62,6 +62,23 @@ public static class ToolMenuCreateBasicToolsPatch
     }
 }
 
+// ToolMenu.OnKeyDown calls e.IsAction(tool.hotkey) without checking for the unbound NumActions, and the key event's
+// flag array is shorter than NumActions, so any key press threw IndexOutOfRangeException. An unbound action is never pressed.
+[HarmonyPatch(typeof(KButtonEvent), nameof(KButtonEvent.IsAction))]
+public static class KButtonEventIsActionPatch
+{
+    public static bool Prefix(Action action, ref bool __result)
+    {
+        if (action >= Action.NumActions)
+        {
+            __result = false;
+            return false;
+        }
+
+        return true;
+    }
+}
+
 // The census button has no hotkey; vanilla asserts when comparing an unbound action.
 [HarmonyPatch(typeof(GameInputMapping), "CompareActionKeyCodes")]
 public static class CompareActionKeyCodesPatch

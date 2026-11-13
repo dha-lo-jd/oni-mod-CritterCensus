@@ -1,5 +1,5 @@
 requiredDlcIds: []
 forbiddenDlcIds: []
 minimumSupportedBuild: 744825
-version: "1.0.2"
+version: "1.0.3"
 APIVersion: 2
