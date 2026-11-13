@@ -2,6 +2,7 @@
 // In-game tests run by Gravitas.TestHarness:
 //   python Gravitas.TestProbe/probe.py run --project <this repo> --tests '{"tags":["crittercensus"]}'
 // Compiled only in Debug builds that set HarnessDllPath in Local.Build.props (Check / Arrange come from the harness assembly).
+using System.Collections;
 using System.Linq;
 using Gravitas.TestHarness;
 using HarmonyLib;
@@ -92,6 +93,19 @@ internal static class HarnessTests
         {
             Arrange.Destroy(hatch);
         }
+    }
+
+    // The census button has no hotkey (Action.NumActions). Vanilla's ToolMenu.OnKeyDown used to throw an IndexOutOfRangeException
+    // for it on every key press (fixed by KButtonEventIsActionPatch, 2026-11-13). The press goes through the game's own input path.
+    [HarnessTest(Name = "crittercensus.key_press_does_not_throw", Tags = "crittercensus")]
+    public static IEnumerator KeyPressDoesNotThrow()
+    {
+        yield return Wait.Ticks(2);
+        Play.ClearTool();
+        Play.Press(KKeyCode.Escape);
+        Play.Press(Action.Dig); // a tool hotkey: ToolMenu compares every tool's hotkey, ours included
+        Play.ClearTool();
+        Play.Press(KKeyCode.Escape);
     }
 }
 #endif
