@@ -10,7 +10,7 @@ ONI mod（Census シリーズ。兄弟は `../PlantCensus`）。Build: `dotnet b
 
 ## 実機検証
 ONI 実機で検証するには Gravitas.TestHarness を使う。テストは `[HarnessTest]` を付けた static メソッドとして書く（`CritterCensus/HarnessTests.cs`、`#if DEBUG && HARNESS`。`HARNESS` は `Local.Build.props` に `HarnessDllPath` があるときだけ定義される）。
-実行: `python C:/Users/dha_1/RiderProjects/GravitasTestHarness/Gravitas.TestProbe/probe.py run --project . --tests '{"tags":["crittercensus"]}'`
+実行: `python C:/Users/dha_1/ONI-Modding/GravitasTestHarness/Gravitas.TestProbe/probe.py run --project . --tests '{"tags":["crittercensus"]}'`
 ゲームを起動し本番の mods.json を書き換えるので、実行前にユーザーに確認する。詳細は harness repo の `README.md` と `protocol.md`。
 
 テストが見ているもの: パッチの二重適用、ツールの登録位置、アイコンの読み込み、生き物の収集（ハッチ 1 匹）。
